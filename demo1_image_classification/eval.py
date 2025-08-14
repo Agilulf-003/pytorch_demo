@@ -19,6 +19,7 @@ def evaluate_model(model, dataloader, criterion, device):
     total_samples = 0
 
     # 不需要计算梯度
+    # with .no_grad() 可以节省内存和计算资源
     with torch.no_grad():
         progress_bar = tqdm(dataloader, desc="Evaluating", unit="batch")
         for inputs, labels in progress_bar:
@@ -26,8 +27,10 @@ def evaluate_model(model, dataloader, criterion, device):
 
             outputs = model(inputs)
             loss = criterion(outputs, labels)
-
+           # 统计损失和准确率
+           #inputs.size(0) is the batch size (number of samples in this batch).     
             running_loss += loss.item() * inputs.size(0)
+
             _, predicted = torch.max(outputs.data, 1)
             total_samples += labels.size(0)
             correct_predictions += (predicted == labels).sum().item()
@@ -45,6 +48,7 @@ def main():
     """
     # 1. 创建DataLoader
     _, val_loader = create_dataloaders() # 这里我们只需要验证loader
+    #We only need the validation DataLoader for evaluation, so we ignore the training DataLoader.
 
     # 2. 加载模型
     model = SimpleCNN().to(DEVICE)
